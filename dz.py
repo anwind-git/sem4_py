@@ -79,7 +79,8 @@ context = {'summa': 0,
            'message_wealth_tax': 'Вычтен налога на богатство 10%',
            'replenishment_error': 'Ошибка пополнения: сумма должна быть кратна 50 у.е.',
            'withdrawal_error': 'Ошибка вывода: сумма должна быть кратна 50 у.е.',
-           'input_error': 'Ошибка ввода: вы ввели не число!'}
+           'input_error': 'Ошибка списания: вы ввели не число!',
+           'insufficient_funds': 'Ошибка списания: на балансе недостаточно средств'}
 
 operations = []
 
@@ -113,14 +114,17 @@ def cash_withdrawal(context):
     try:
         withdrawal_amount = int(input("Сумма снятия: "))
         percentages = max(min(withdrawal_amount * context['percent'], context['max_fee']), context['min_fee'])
-        if withdrawal_amount % 50 == 0 and withdrawal_amount + percentages < context['summa']:
-            context['summa'] -= percentages + withdrawal_amount
-            context['number_operations'] += 1
-            operations.append(f"списание: {withdrawal_amount} время: {now}")
-            if context['number_operations'] == 3:
-                modify_balance(context)
-                return f"{context['message_three_operations']}. Сумма {withdrawal_amount} списана, на счете: {context['summa']}"
-            return f"Снятие наличных выполнено. Баланс: {context['summa']} y.e."
+        if withdrawal_amount % 50 == 0:
+            if withdrawal_amount + percentages < context['summa']:
+                context['summa'] -= percentages + withdrawal_amount
+                context['number_operations'] += 1
+                operations.append(f"списание: {withdrawal_amount} время: {now}")
+                if context['number_operations'] == 3:
+                    modify_balance(context)
+                    return f"{context['message_three_operations']}. Сумма {withdrawal_amount} списана, на счете: {context['summa']}"
+                return f"Снятие наличных выполнено. Баланс: {context['summa']} y.e."
+            else:
+                return f"{context['insufficient_funds']} Баланс: {context['summa']}"
         else:
             return f"{context['withdrawal_error']} Баланс: {context['summa']}"
     except ValueError:
