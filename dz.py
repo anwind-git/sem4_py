@@ -1,5 +1,5 @@
 from datetime import datetime
-
+'''
 # Напишите функцию для транспонирования матрицы
 print("--------------------------")
 print("dz1")
@@ -67,7 +67,7 @@ print(my_dict)
 print("--------------------------")
 print("dz3")
 print("--------------------------")
-
+'''
 context = {'summa': 0,
            'number_operations': 0,
            'percent': 0.015,
@@ -76,58 +76,54 @@ context = {'summa': 0,
            'min_fee': 30,
            'message_three_operations': 'Начислены 3% от баланса за 3-и проведенных операции',
            'message_wealth_tax': 'Вычтен налог на богатство 10%',
-           'replenishment_error': 'Ошибка пополнения: сумма должна быть кратна 50 у.е.',
-           'withdrawal_error': 'Ошибка вывода: сумма должна быть кратна 50 у.е.',
-           'input_error': 'Ошибка списания: вы ввели не число!',
+           'incorrect_amount': 'Ошибка: сумма должна быть кратна 50 у.е.',
            'insufficient_funds': 'Ошибка списания: на балансе недостаточно средств'}
 
 operations = []
 
-now = datetime.now()
+data = datetime.now()
+
+
+def input_amount():
+    requested_amount = 0
+    while requested_amount <= 0:
+        try:
+            requested_amount = int(input("Введите сумму: "))
+            if requested_amount % 50 == 0 and requested_amount > 0:
+                return requested_amount
+            else:
+                requested_amount = 0
+                print(context['incorrect_amount'])
+        except ValueError:
+            print("Ошибка ввода")
 
 
 def balance_top_up(context):
-    if context['summa'] > 5000000:
-        wealth_tax(context)
-        return f"{context['message_wealth_tax']}, баланс: {context['summa']}."
-    try:
-        replenishment_amount = int(input("Внесите сумму: "))
-        if replenishment_amount % 50 == 0:
-            context['summa'] += replenishment_amount
-            context['number_operations'] += 1
-            operations.append(f"пополнение: {replenishment_amount} время: {now}")
-            if context['number_operations'] == 3:
-                modify_balance(context)
-                return f"{context['message_three_operations']}. Баланс пополнен, на счете: {context['summa']}"
-            return f"Баланс пополнен на {replenishment_amount}, сумма: {context['summa']}"
-        else:
-            return f"{context['replenishment_error']} Баланс: {context['summa']}"
-    except ValueError:
-        return f"{context['input_error']} Баланс: {context['summa']}"
+    wealth_tax(context)
+    requested_amount = input_amount()
+    context['summa'] += requested_amount
+    context['number_operations'] += 1
+    operations.append(f"пополнение: {requested_amount} время: {data}")
+    if context['number_operations'] == 3:
+        modify_balance(context)
+        return f"{context['message_three_operations']}. Баланс пополнен, на счете: {context['summa']}"
+    return f"Баланс пополнен на {requested_amount}, сумма: {context['summa']}"
 
 
 def cash_withdrawal(context):
-    if context['summa'] > 5000000:
-        wealth_tax(context)
-        return f"{context['message_wealth_tax']}, баланс: {context['summa']}."
-    try:
-        withdrawal_amount = int(input("Сумма снятия: "))
-        percentages = max(min(withdrawal_amount * context['percent'], context['max_fee']), context['min_fee'])
-        if withdrawal_amount % 50 == 0:
-            if withdrawal_amount + percentages < context['summa']:
-                context['summa'] -= percentages + withdrawal_amount
-                context['number_operations'] += 1
-                operations.append(f"списание: {withdrawal_amount} время: {now}")
-                if context['number_operations'] == 3:
-                    modify_balance(context)
-                    return f"{context['message_three_operations']}. Сумма {withdrawal_amount} списана, на счете: {context['summa']}"
-                return f"Снятие наличных выполнено. Баланс: {context['summa']} y.e."
-            else:
-                return f"{context['insufficient_funds']} Баланс: {context['summa']}"
-        else:
-            return f"{context['withdrawal_error']} Баланс: {context['summa']}"
-    except ValueError:
-        return f"{context['input_error']} Баланс: {context['summa']}"
+    wealth_tax(context)
+    requested_amount = input_amount()
+    percentages = max(min(requested_amount * context['percent'], context['max_fee']), context['min_fee'])
+    if requested_amount + percentages < context['summa']:
+        context['summa'] -= percentages + requested_amount
+        context['number_operations'] += 1
+        operations.append(f"списание: {requested_amount} время: {data}")
+        if context['number_operations'] == 3:
+            modify_balance(context)
+            return f"{context['message_three_operations']}. Сумма {requested_amount} списана, на счете: {context['summa']}"
+        return f"Снятие наличных выполнено. Баланс: {context['summa']} y.e."
+    else:
+        return f"{context['insufficient_funds']} Баланс: {context['summa']}"
 
 
 def modify_balance(context):
@@ -136,8 +132,10 @@ def modify_balance(context):
 
 
 def wealth_tax(context):
-    context['summa'] -= context['summa'] * context['percent_10'] / 100
-    operations.append(f"налог на богатство: {context['summa']}, время: {now}")
+    if context['summa'] > 5000000:
+        context['summa'] -= context['summa'] * context['percent_10'] / 100
+        operations.append(f"налог на богатство: {context['summa']}, время: {data}")
+        print(f"{context['message_wealth_tax']}, баланс: {context['summa']}")
 
 
 def operation_historyions():
