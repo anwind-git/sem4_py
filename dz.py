@@ -72,11 +72,10 @@ context = {'summa': 0,
            'number_operations': 0,
            'percent': 0.015,
            'percent_10': 10,
-           'interest_wealth': 0.100,
            'max_fee': 600,
            'min_fee': 30,
            'message_three_operations': 'Начислены 3% от баланса за 3-и проведенных операции',
-           'message_wealth_tax': 'Вычтен налога на богатство 10%',
+           'message_wealth_tax': 'Вычтен налог на богатство 10%',
            'replenishment_error': 'Ошибка пополнения: сумма должна быть кратна 50 у.е.',
            'withdrawal_error': 'Ошибка вывода: сумма должна быть кратна 50 у.е.',
            'input_error': 'Ошибка списания: вы ввели не число!',
@@ -137,8 +136,8 @@ def modify_balance(context):
 
 
 def wealth_tax(context):
-    operations.append(f"налог на богатство: {context['summa'] * context['percent_10'] / 100}, время: {now}")
-    context['summa'] -= context['summa'] * context['percent_10']
+    context['summa'] -= context['summa'] * context['percent_10'] / 100
+    operations.append(f"налог на богатство: {context['summa']}, время: {now}")
 
 
 def operation_historyions():
